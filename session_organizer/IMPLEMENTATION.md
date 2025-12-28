@@ -45,7 +45,7 @@ python-dotenv==1.0.0
 
 ---
 
-## 3. Google Drive API セットアップ
+## 3. Google Drive API セットアップ（OAuth2認証）
 
 ### 3.1 Google Cloud Console での設定
 
@@ -54,24 +54,38 @@ python-dotenv==1.0.0
    - プロジェクト名：`coaching-app-prototype`
 3. Google Drive API を有効化
    - 「APIとサービス」→「ライブラリ」→「Google Drive API」→「有効にする」
-4. サービスアカウントを作成
-   - 「APIとサービス」→「認証情報」→「認証情報を作成」→「サービスアカウント」
-   - サービスアカウント名：`coaching-app-service`
-   - 役割：なし（Drive フォルダで個別に権限付与）
-5. JSON キーをダウンロード
-   - サービスアカウント詳細画面 → 「キー」タブ → 「鍵を追加」→「JSON」
-   - ダウンロードしたファイルを `credentials/service_account.json` に配置
+4. OAuth 同意画面の設定
+   - 「APIとサービス」→「OAuth 同意画面」
+   - ユーザータイプ：「外部」を選択
+   - アプリ名、サポートメールなどを入力
+   - スコープの追加：`https://www.googleapis.com/auth/drive.file`
+5. OAuth クライアント ID を作成
+   - 「APIとサービス」→「認証情報」→「認証情報を作成」→「OAuth クライアント ID」
+   - アプリケーションの種類：**「デスクトップアプリ」**
+   - 名前：`coaching-app-client`
+6. JSON をダウンロード
+   - 作成された認証情報の右側のダウンロードアイコンをクリック
+   - ダウンロードしたファイルを `credentials/client_secrets.json` にリネームして配置
 
-### 3.2 Google Drive フォルダの準備
+### 3.2 初回認証
 
-1. Google Drive で専用フォルダを作成
-   - フォルダ名：`CoachingApp_Prototype`
-2. サービスアカウントのメールアドレスを共有設定に追加
-   - サービスアカウントのメール（例：`coaching-app-service@xxx.iam.gserviceaccount.com`）
-   - 権限：「編集者」
-3. フォルダIDを控える
-   - フォルダのURL：`https://drive.google.com/drive/folders/FOLDER_ID`
-   - `FOLDER_ID` の部分をコピー
+アプリ初回起動時に：
+1. 自動的にブラウザが開きます
+2. Google アカウントでログイン
+3. アプリへのアクセスを許可
+4. 認証完了後、トークンが `credentials/token.pickle` に自動保存されます
+
+以降は自動的に認証されます（トークンの有効期限は自動更新）
+
+### 3.3 Google Drive フォルダの準備（任意）
+
+特定のフォルダに保存したい場合：
+1. Google Drive で専用フォルダを作成（例：`CoachingApp_Reports`）
+2. フォルダのURLからフォルダIDを取得
+   - URL例：`https://drive.google.com/drive/folders/FOLDER_ID`
+3. `.env` ファイルに `GOOGLE_DRIVE_FOLDER_ID` を設定
+
+※ フォルダIDを設定しない場合は Drive のルートに保存されます
 
 ---
 
@@ -80,9 +94,9 @@ python-dotenv==1.0.0
 ### 4.1 `.env` ファイルの作成
 
 ```bash
-# Google Drive 設定
-GOOGLE_DRIVE_FOLDER_ID=your_folder_id_here
-GOOGLE_SERVICE_ACCOUNT_FILE=credentials/service_account.json
+# Google Drive 設定（任意）
+# フォルダIDを指定しない場合は Drive のルートに保存されます
+GOOGLE_DRIVE_FOLDER_ID=
 
 # アプリ設定
 COACH_NAME=山田太郎
@@ -92,8 +106,11 @@ DEFAULT_CLIENT_NAME=
 ### 4.2 `.env.example` ファイル
 
 ```bash
+# Google Drive 設定（任意）
+# フォルダIDを指定しない場合は Drive のルートに保存されます
 GOOGLE_DRIVE_FOLDER_ID=
-GOOGLE_SERVICE_ACCOUNT_FILE=credentials/service_account.json
+
+# アプリ設定
 COACH_NAME=
 DEFAULT_CLIENT_NAME=
 ```
@@ -374,22 +391,21 @@ streamlit run app.py
 ---
 
 ## 9. トラブルシューティング
-
-### 9.1 Google Drive API エラー
-
-**エラー：** `HttpError 403: Insufficient Permission`
-
-**原因：**
-- サービスアカウントがフォルダにアクセスできない
+FileNotFoundError: OAuth2 認証情報ファイルが見つかりません`
 
 **解決：**
-1. フォルダの共有設定を確認
-2. サービスアカウントのメールアドレスを「編集者」として追加
+1. Google Cloud Console で OAuth クライアント ID を作成
+2. JSON を `credentials/client_secrets.json` に配置
+3. アプリケーションの種類が「デスクトップアプリ」であることを確認
 
 ---
 
-**エラー：** `FileNotFoundError: credentials/service_account.json`
+**エラー：** 初回認証時にブラウザが開かない
 
+**解決：**
+1. ターミナルに表示された URL を手動でブラウザで開く
+2. ローカル環境でポート転送の問題がないか確認
+3. `flow.run_local_server(port=0)` が実行されている
 **解決：**
 1. JSON ファイルが正しい場所にあるか確認
 2. `.env` のパスが正しいか確認

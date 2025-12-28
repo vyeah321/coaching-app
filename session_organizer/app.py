@@ -156,14 +156,19 @@ def main():
         st.divider()
         st.header("4️⃣ Google Drive に保存")
         
-        # 環境変数チェック
-        folder_id = os.getenv('GOOGLE_DRIVE_FOLDER_ID')
-        service_account_file = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE', 'credentials/service_account.json')
+        # OAuth2 認証状態の確認
+        client_secrets_file = 'credentials/client_secrets.json'
         
-        if not folder_id:
-            st.warning("⚠️ Google Drive のフォルダIDが設定されていません（.env ファイルを確認してください）")
-        elif not os.path.exists(service_account_file):
-            st.warning(f"⚠️ 認証情報ファイルが見つかりません: {service_account_file}")
+        if not os.path.exists(client_secrets_file):
+            st.warning(
+                "⚠️ Google Drive 連携の設定が必要です\n\n"
+                "**セットアップ手順:**\n"
+                "1. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクト作成\n"
+                "2. Google Drive API を有効化\n"
+                "3. OAuth クライアント ID を作成（デスクトップアプリ）\n"
+                "4. JSON を `credentials/client_secrets.json` に配置\n\n"
+                "詳細は [IMPLEMENTATION.md](IMPLEMENTATION.md) を参照"
+            )
         else:
             upload_button = st.button(
                 "☁️ Google Drive に保存",

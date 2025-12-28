@@ -1,43 +1,75 @@
 """
 Google Drive アップローダーモジュール
-Markdown ファイルを Google Drive にアップロードする
+Markdown ファイルを Google Drive にアップロードする（OAuth2認証）
 """
 import os
+import pickle
 from typing import Optional
-from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaInMemoryUpload
 
 
-# スコープ: ファイル作成のみ
+# スコープ: ファイル作成と管理
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
+
+# 認証トークンの保存先
+TOKEN_FILE = 'credentials/token.pickle'
+CLIENT_SECRETS_FILE = 'credentials/client_secrets.json'
 
 
 def get_drive_service():
     """
-    Google Drive サービスオブジェクトを取得
+    Google Drive サービスオブジェクトを取得（OAuth2認証）
+    
+    初回実行時はブラウザで Google ログインが必要
+    認証後はトークンをローカルに保存して再利用
     
     Returns:
         Google Drive API サービスオブジェクト
     
     Raises:
-        FileNotFoundError: 認証情報ファイルが見つからない
+        FileNotFoundError: client_secrets.json が見つからない
         Exception: 認証に失敗
     """
-    service_account_file = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE', 'credentials/service_account.json')
+    creds = None
     
-    if not os.path.exists(service_account_file):
-        raise FileNotFoundError(
-            f"認証情報ファイルが見つかりません: {service_account_file}\n"
-            f"Google Cloud Console からサービスアカウントの JSON キーをダウンロードし、\n"
-            f"{service_account_file} に配置してください。"
-        )
+    # 保存されたトークンを読み込み
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, 'rb') as token:
+            creds = pickle.load(token)
     
-    credentials = service_account.Credentials.from_service_account_file(
-        service_account_file, scopes=SCOPES
-    )
+    # トークンが無効または期限切れの場合
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            # トークンをリフレッシュ
+            creds.refresh(Request())
+        else:
+            # 新規認証フロー
+            if not os.path.exists(CLIENT_SECRETS_FILE):
+                raise FileNotFoundError(
+                    f"OAuth2 認証情報ファイルが見つかりません: {CLIENT_SECRETS_FILE}\n\n"
+                    f"【セットアップ手順】\n"
+                    f"1. Google Cloud Console (https://console.cloud.google.com/) にアクセス\n"
+                    f"2. プロジェクトを作成または選択\n"
+                    f"3. Google Drive API を有効化\n"
+                    f"4. 「認証情報」→「認証情報を作成」→「OAuth クライアント ID」\n"
+                    f"5. アプリケーションの種類：「デスクトップアプリ」\n"
+                    f"6. JSON をダウンロードして {CLIENT_SECRETS_FILE} に配置\n"
+                )
+            
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CLIENT_SECRETS_FILE, SCOPES
+            )
+            creds = flow.run_local_server(port=0)
+        
+        # トークンを保存
+        os.makedirs(os.path.dirname(TOKEN_FILE), exist_ok=True)
+        with open(TOKEN_FILE, 'wb') as token:
+            pickle.dump(creds, token)
     
-    return build('drive', 'v3', credentials=credentials)
+    return build('drive', 'v3', credentials=creds)
 
 
 def upload_to_drive(
@@ -51,23 +83,20 @@ def upload_to_drive(
     Args:
         filename: ファイル名（例：20251228_client_report.md）
         content: Markdown コンテンツ
-        folder_id: アップロード先フォルダID（省略時は環境変数から取得）
+        folder_id: アップロード先フォルダID（省略時は環境変数から取得、さらに省略時はルートに保存）
     
     Returns:
         アップロード結果（id, name, webViewLink を含む辞書）
     
     Raises:
-        ValueError: フォルダIDが指定されていない
         Exception: アップロードに失敗
     """
     if folder_id is None:
         folder_id = os.getenv('GOOGLE_DRIVE_FOLDER_ID')
     
+    # フォルダIDが指定されていない場合はルートに保存（警告のみ）
     if not folder_id:
-        raise ValueError(
-            "Google Drive のフォルダIDが設定されていません。\n"
-            ".env ファイルに GOOGLE_DRIVE_FOLDER_ID を設定してください。"
-        )
+        print("⚠️  GOOGLE_DRIVE_FOLDER_ID が未設定のため、Drive のルートに保存します")
     
     try:
         service = get_drive_service()
@@ -75,9 +104,12 @@ def upload_to_drive(
         # ファイルメタデータ
         file_metadata = {
             'name': filename,
-            'parents': [folder_id],
             'mimeType': 'text/markdown'
         }
+        
+        # フォルダIDが指定されている場合のみ親フォルダを設定
+        if folder_id:
+            file_metadata['parents'] = [folder_id]
         
         # ファイル内容
         media = MediaInMemoryUpload(

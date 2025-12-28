@@ -23,9 +23,10 @@ pip install -r requirements.txt
 
 1. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクト作成
 2. Google Drive API を有効化
-3. サービスアカウントを作成し、JSON キーをダウンロード
-4. `credentials/service_account.json` に配置
-5. Google Drive でフォルダを作成し、サービスアカウントと共有
+3. OAuth クライアント ID を作成（**デスクトップアプリ**）
+4. JSON をダウンロードして `credentials/client_secrets.json` に配置
+
+初回実行時にブラウザで Google ログインが求められます。
 
 詳細は [IMPLEMENTATION.md](IMPLEMENTATION.md) を参照
 
