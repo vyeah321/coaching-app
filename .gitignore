@@ -17,6 +17,8 @@ build/
 # Google Drive 認証情報
 credentials/
 *.json
+*.pickle
+!session_organizer/.streamlit/*.example
 
 # IDE
 .vscode/

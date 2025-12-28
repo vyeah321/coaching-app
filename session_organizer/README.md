@@ -39,11 +39,23 @@ cp .env.example .env
 
 ## 実行
 
+### ローカル実行
+
 ```bash
 streamlit run app.py
 ```
 
 ブラウザで http://localhost:8501 が開きます
+
+### Streamlit Cloud デプロイ
+
+プロダクション環境として使う場合は Streamlit Cloud にデプロイすることを推奨します。  
+詳細は [DEPLOY.md](DEPLOY.md) を参照してください。
+
+**メリット:**
+- ユーザーは Google ログインするだけ
+- 技術的な設定不要
+- どこからでもアクセス可能
 
 ## ドキュメント
 

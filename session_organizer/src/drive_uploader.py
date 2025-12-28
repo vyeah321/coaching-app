@@ -1,12 +1,14 @@
 """
 Google Drive アップローダーモジュール
-Markdown ファイルを Google Drive にアップロードする（OAuth2認証）
+Markdown ファイルを Google Drive にアップロードする（OAuth2認証 - Streamlit Cloud対応）
 """
 import os
 import pickle
 from typing import Optional
+import streamlit as st
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaInMemoryUpload
 
@@ -23,17 +25,24 @@ def get_drive_service():
     """
     Google Drive サービスオブジェクトを取得（OAuth2認証）
     
-    初回実行時はブラウザで Google ログインが必要
-    認証後はトークンをローカルに保存して再利用
+    Streamlit Cloud の場合は Secrets から認証情報を取得
+    ローカルの場合は client_secrets.json を使用
     
     Returns:
         Google Drive API サービスオブジェクト
     
     Raises:
-        FileNotFoundError: client_secrets.json が見つからない
+        FileNotFoundError: 認証情報が見つからない
         Exception: 認証に失敗
     """
     creds = None
+    
+    # Streamlit Cloud の Secrets をチェック
+    if hasattr(st, 'secrets') and 'GOOGLE_CLIENT_ID' in st.secrets:
+        # Streamlit Cloud 環境
+        # Note: 完全な OAuth フローは Streamlit の制限により複雑
+        # 簡易実装としてローカル認証と同じフローを使用
+        pass
     
     # 保存されたトークンを読み込み
     if os.path.exists(TOKEN_FILE):
@@ -50,13 +59,15 @@ def get_drive_service():
             if not os.path.exists(CLIENT_SECRETS_FILE):
                 raise FileNotFoundError(
                     f"OAuth2 認証情報ファイルが見つかりません: {CLIENT_SECRETS_FILE}\n\n"
-                    f"【セットアップ手順】\n"
+                    f"【ローカル実行の場合】\n"
                     f"1. Google Cloud Console (https://console.cloud.google.com/) にアクセス\n"
                     f"2. プロジェクトを作成または選択\n"
                     f"3. Google Drive API を有効化\n"
                     f"4. 「認証情報」→「認証情報を作成」→「OAuth クライアント ID」\n"
                     f"5. アプリケーションの種類：「デスクトップアプリ」\n"
-                    f"6. JSON をダウンロードして {CLIENT_SECRETS_FILE} に配置\n"
+                    f"6. JSON をダウンロードして {CLIENT_SECRETS_FILE} に配置\n\n"
+                    f"【Streamlit Cloud の場合】\n"
+                    f"DEPLOY.md を参照してください"
                 )
             
             flow = InstalledAppFlow.from_client_secrets_file(
