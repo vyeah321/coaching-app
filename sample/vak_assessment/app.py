@@ -231,6 +231,16 @@ def main():
     
     else:
         # 結果表示
+        # ページ先頭にスクロール
+        st.components.v1.html(
+            """
+            <script>
+                window.parent.document.querySelector('section.main').scrollTo(0, 0);
+            </script>
+            """,
+            height=0,
+        )
+        
         st.subheader("🎉 診断完了！")
         
         # スコア計算
