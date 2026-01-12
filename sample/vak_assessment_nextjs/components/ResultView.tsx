@@ -155,7 +155,7 @@ VAK コミュニケーションタイプ診断より`;
                   margin: { t: 40, b: 12, l: 60, r: 60 },
                   title: {
                     text: 'スコア分布',
-                    font: { size: 20 },
+                    font: { size: 30 },
                     x: 0.5,
                     xanchor: 'center',
                     y: 0.98,
