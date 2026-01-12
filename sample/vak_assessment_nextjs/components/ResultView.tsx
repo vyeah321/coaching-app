@@ -143,12 +143,7 @@ VAK コミュニケーションタイプ診断より`;
                 },
               },
               showlegend: false,
-              height: 500,
-              margin: { t: 50, b: 10, l: 10, r: 10 },
-              title: {
-                text: 'あなたのコミュニケーションタイプ',
-                font: { size: 20 },
-              },
+              height: 400,
             }}
             config={{ staticPlot: true, displayModeBar: false }}
             style={{ width: '100%' }}
