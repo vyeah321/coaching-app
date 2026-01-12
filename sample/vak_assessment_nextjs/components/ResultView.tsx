@@ -149,14 +149,19 @@ VAK コミュニケーションタイプ診断より`;
                   automargin: true,
                 },
               },
-              showlegend: false,
+                  showlegend: false,
                   height: 440,
-                  margin: { t: 20, b: 24, l: 60, r: 60 },
-              title: {
-                text: 'スコア分布',
-                font: { size: 18 },
-                x: 0.5,
-              },
+                  /* 上にタイトル領域を確保して、下の余白は小さくする */
+                  margin: { t: 40, b: 12, l: 60, r: 60 },
+                  title: {
+                    text: 'スコア分布',
+                    font: { size: 18 },
+                    x: 0.5,
+                    xanchor: 'center',
+                    y: 0.98,
+                    yanchor: 'top',
+                    pad: { t: 6, b: 0 },
+                  },
             }}
             config={{ staticPlot: true, displayModeBar: false }}
             style={{ width: '100%' }}
