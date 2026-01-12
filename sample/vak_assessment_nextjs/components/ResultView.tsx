@@ -136,14 +136,22 @@ VAK コミュニケーションタイプ診断より`;
               },
             ]}
             layout={{
+              autosize: true,
               polar: {
                 radialaxis: {
                   visible: true,
                   range: [0, 20],
+                  automargin: true,
+                  tickfont: { size: 11 },
+                },
+                angularaxis: {
+                  tickfont: { size: 12 },
+                  automargin: true,
                 },
               },
               showlegend: false,
-              height: 400,
+              height: 440,
+              margin: { t: 20, b: 44, l: 40, r: 40 },
             }}
             config={{ staticPlot: true, displayModeBar: false }}
             style={{ width: '100%' }}
