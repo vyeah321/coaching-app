@@ -260,19 +260,19 @@ VAK コミュニケーションタイプ診断より`;
         {/* メール送信 */}
         <div className="bg-white rounded-lg shadow-xl p-6 mb-6">
           <h3 className="text-xl font-bold text-gray-800 mb-2">📧 この結果を自分に送る</h3>
-          <p className="text-gray-600 mb-4">後でゆっくり読み返せます</p>
-          <div className="flex gap-3">
+          <p className="text-gray-600 mb-3">後でゆっくり読み返せます</p>
+          <div className="flex flex-col gap-3 items-center">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="example@mail.com"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full max-w-md px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <button
               onClick={handleEmailSend}
               disabled={!email.includes('@')}
-              className="bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-blue-600 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full max-w-md bg-primary text-white font-medium py-2.5 px-6 rounded-lg hover:bg-blue-600 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               📧 メールアプリを開く
             </button>

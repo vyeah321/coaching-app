@@ -66,10 +66,10 @@ export default function QuestionView({
               <button
                 key={score}
                 onClick={() => onAnswer(question.id, score)}
-                className="bg-primary hover:bg-blue-600 text-white font-medium py-4 px-6 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+                className="bg-primary hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
               >
-                <div className="text-sm mb-1">{label}</div>
-                <div className="text-2xl font-bold">{score}</div>
+                <div className="text-xs md:text-sm mb-0.5">{label}</div>
+                <div className="text-xl md:text-2xl font-bold">{score}</div>
               </button>
             ))}
           </div>
