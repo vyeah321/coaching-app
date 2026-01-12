@@ -150,8 +150,13 @@ VAK コミュニケーションタイプ診断より`;
                 },
               },
               showlegend: false,
-              height: 440,
-              margin: { t: 20, b: 44, l: 40, r: 40 },
+                  height: 440,
+                  margin: { t: 20, b: 24, l: 60, r: 60 },
+              title: {
+                text: 'スコア分布',
+                font: { size: 18 },
+                x: 0.5,
+              },
             }}
             config={{ staticPlot: true, displayModeBar: false }}
             style={{ width: '100%' }}
